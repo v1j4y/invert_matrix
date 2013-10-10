@@ -1,0 +1,2 @@
+mat.irp.f                 : real*8, allocatable       :: m                         (rank,rank)
+rank.irp.f                : integer                   :: rank                      
