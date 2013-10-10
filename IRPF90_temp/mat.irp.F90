@@ -65,12 +65,12 @@ subroutine bld_m
     M(3,1)=2d0                                                          ! mat.irp.f:  18
     M(3,2)=0d0                                                          ! mat.irp.f:  19
     M(3,3)=1d0                                                          ! mat.irp.f:  20
-    print *, 'Matrix:'                                                  ! mat.irp.f:  22
-    do i=1,rank                                                         ! mat.irp.f:  23
-        do j=1,rank                                                     ! mat.irp.f:  24
-            write(6,12)M(j,i)                                           ! mat.irp.f:  25
-        enddo                                                           ! mat.irp.f:  26
-            write(6,*)                                                  ! mat.irp.f:  27
-    enddo                                                               ! mat.irp.f:  28
-   12   format((F5.2,'  '),$)                                           ! mat.irp.f:  31
+    print *, 'Matrix:'                                                  ! mat.irp.f:  52
+    do i=1,rank                                                         ! mat.irp.f:  53
+        do j=1,rank                                                     ! mat.irp.f:  54
+            write(6,12)M(j,i)                                           ! mat.irp.f:  55
+        enddo                                                           ! mat.irp.f:  56
+            write(6,*)                                                  ! mat.irp.f:  57
+    enddo                                                               ! mat.irp.f:  58
+   12   format((F5.2,'  '),$)                                           ! mat.irp.f:  61
 end subroutine bld_m

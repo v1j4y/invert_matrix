@@ -16,40 +16,61 @@ program invert
           allocate (IPIV(N))
           allocate (WORK(N*(2*N)))
           LDA=N
+          LWORK=N
           UPLO='U'
           JOBZ='V'
 
-          K=0
           do j=1,N
-          do i=1,j
-            AP(i+(j-1)*j/2)=M(i,j)
-            K=K+1
+          do i=1,N
+            A(j,i)=M(j,i)
           enddo
           enddo
+
+!         K=0
+!         do j=1,N
+!         do i=1,j
+!           AP(i+(j-1)*j/2)=M(i,j)
+!           K=K+1
+!         enddo
+!         enddo
 
 !    invert the matrix
-          call DSPTRF( UPLO, N, AP, IPIV, INFO )
-!         write(6,*)'------------'
-!         write(6,*)INFO
+          call DGETRF( N, N, A, LDA, IPIV, INFO )
+          write(6,*)'------------'
+          write(6,*)INFO
           if (INFO.ne.0)then
               print*,'Error at dspev'
               call exit(1)
           endif
-!         INFO=0
-          call DSPTRI( UPLO, N, AP, IPIV, WORK, INFO )
+          print *, 'Matrix after DGETRF:'
+          do i=1,rank
+            do j=1,rank
+                write(6,12)(A(j,i))
+            enddo
+                write(6,*)
+          enddo
+          INFO=0
+          call DGETRI( N, A, LDA, IPIV, WORK, LWORK, INFO )
 
-!         write(6,*)'------------'
-!         write(6,*)INFO
+          write(6,*)'------------'
+          write(6,*)INFO
 
           if (INFO.ne.0)then
               print*,'Error at dspev'
               call exit(1)
           endif
+          print *, 'Matrix after DGETRI:'
+          do i=1,rank
+            do j=1,rank
+                write(6,12)(A(j,i))
+            enddo
+                write(6,*)
+          enddo
 
           do i=1,rank
-            do j=1,i
-                INV(j,i)= AP(j + (i-1)*i/2)
-                INV(i,j)= INV(j,i)
+            do j=1,rank
+!               INV(j,i)= A(i,j)
+                INV(i,j)= A(i,j)
             enddo
           enddo
 
@@ -77,7 +98,7 @@ program invert
           deallocate (AP)
           deallocate (IPIV)
           deallocate (WORK)
-   12   format((F5.2,'  '),$)
+   12   format((F8.4,'  '),$)
 !contains
     !TODO
 end program invert

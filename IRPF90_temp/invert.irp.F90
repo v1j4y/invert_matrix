@@ -35,52 +35,69 @@ subroutine invert                                                    ! invert.ir
           allocate (IPIV(N))                                         ! invert.irp.f:  16
           allocate (WORK(N*(2*N)))                                   ! invert.irp.f:  17
           LDA=N                                                      ! invert.irp.f:  18
-          UPLO='U'                                                   ! invert.irp.f:  19
-          JOBZ='V'                                                   ! invert.irp.f:  20
-          K=0                                                        ! invert.irp.f:  22
+          LWORK=N                                                    ! invert.irp.f:  19
+          UPLO='U'                                                   ! invert.irp.f:  20
+          JOBZ='V'                                                   ! invert.irp.f:  21
           do j=1,N                                                   ! invert.irp.f:  23
-          do i=1,j                                                   ! invert.irp.f:  24
-            AP(i+(j-1)*j/2)=M(i,j)                                   ! invert.irp.f:  25
-            K=K+1                                                    ! invert.irp.f:  26
+          do i=1,N                                                   ! invert.irp.f:  24
+            A(j,i)=M(j,i)                                            ! invert.irp.f:  25
+          enddo                                                      ! invert.irp.f:  26
           enddo                                                      ! invert.irp.f:  27
-          enddo                                                      ! invert.irp.f:  28
-          call DSPTRF( UPLO, N, AP, IPIV, INFO )                     ! invert.irp.f:  31
-          if (INFO.ne.0)then                                         ! invert.irp.f:  34
-              print*,'Error at dspev'                                ! invert.irp.f:  35
-              call exit(1)                                           ! invert.irp.f:  36
-          endif                                                      ! invert.irp.f:  37
-          call DSPTRI( UPLO, N, AP, IPIV, WORK, INFO )               ! invert.irp.f:  39
-          if (INFO.ne.0)then                                         ! invert.irp.f:  44
-              print*,'Error at dspev'                                ! invert.irp.f:  45
-              call exit(1)                                           ! invert.irp.f:  46
-          endif                                                      ! invert.irp.f:  47
-          do i=1,rank                                                ! invert.irp.f:  49
-            do j=1,i                                                 ! invert.irp.f:  50
-                INV(j,i)= AP(j + (i-1)*i/2)                          ! invert.irp.f:  51
-                INV(i,j)= INV(j,i)                                   ! invert.irp.f:  52
-            enddo                                                    ! invert.irp.f:  53
-          enddo                                                      ! invert.irp.f:  54
-          print *, 'Matrix Inverse:'                                 ! invert.irp.f:  56
-          do i=1,rank                                                ! invert.irp.f:  57
-            do j=1,rank                                              ! invert.irp.f:  58
-                write(6,12)(INV(j,i))                                ! invert.irp.f:  59
-            enddo                                                    ! invert.irp.f:  60
-                write(6,*)                                           ! invert.irp.f:  61
-          enddo                                                      ! invert.irp.f:  62
-          PROD=0d0                                                   ! invert.irp.f:  64
-          print *, 'Matrix Inverse*Matrix:'                          ! invert.irp.f:  65
-          do i=1,rank                                                ! invert.irp.f:  66
-            do j=1,rank                                              ! invert.irp.f:  67
-                do k=1,rank                                          ! invert.irp.f:  68
-                    PROD(j,i)=PROD(j,i)+(INV(j,k)*M(k,i))            ! invert.irp.f:  69
-                enddo                                                ! invert.irp.f:  70
-                write(6,12)((PROD(j,i)))                             ! invert.irp.f:  71
-            enddo                                                    ! invert.irp.f:  72
-                write(6,*)                                           ! invert.irp.f:  73
-          enddo                                                      ! invert.irp.f:  74
-          deallocate (A)                                             ! invert.irp.f:  76
-          deallocate (AP)                                            ! invert.irp.f:  77
-          deallocate (IPIV)                                          ! invert.irp.f:  78
-          deallocate (WORK)                                          ! invert.irp.f:  79
-   12   format((F5.2,'  '),$)                                        ! invert.irp.f:  80
-end                                                                  ! invert.irp.f:  83
+          call DGETRF( N, N, A, LDA, IPIV, INFO )                    ! invert.irp.f:  38
+          write(6,*)'------------'                                   ! invert.irp.f:  39
+          write(6,*)INFO                                             ! invert.irp.f:  40
+          if (INFO.ne.0)then                                         ! invert.irp.f:  41
+              print*,'Error at dspev'                                ! invert.irp.f:  42
+              call exit(1)                                           ! invert.irp.f:  43
+          endif                                                      ! invert.irp.f:  44
+          print *, 'Matrix after DGETRF:'                            ! invert.irp.f:  45
+          do i=1,rank                                                ! invert.irp.f:  46
+            do j=1,rank                                              ! invert.irp.f:  47
+                write(6,12)(A(j,i))                                  ! invert.irp.f:  48
+            enddo                                                    ! invert.irp.f:  49
+                write(6,*)                                           ! invert.irp.f:  50
+          enddo                                                      ! invert.irp.f:  51
+          INFO=0                                                     ! invert.irp.f:  52
+          call DGETRI( N, A, LDA, IPIV, WORK, LWORK, INFO )          ! invert.irp.f:  53
+          write(6,*)'------------'                                   ! invert.irp.f:  55
+          write(6,*)INFO                                             ! invert.irp.f:  56
+          if (INFO.ne.0)then                                         ! invert.irp.f:  58
+              print*,'Error at dspev'                                ! invert.irp.f:  59
+              call exit(1)                                           ! invert.irp.f:  60
+          endif                                                      ! invert.irp.f:  61
+          print *, 'Matrix after DGETRI:'                            ! invert.irp.f:  62
+          do i=1,rank                                                ! invert.irp.f:  63
+            do j=1,rank                                              ! invert.irp.f:  64
+                write(6,12)(A(j,i))                                  ! invert.irp.f:  65
+            enddo                                                    ! invert.irp.f:  66
+                write(6,*)                                           ! invert.irp.f:  67
+          enddo                                                      ! invert.irp.f:  68
+          do i=1,rank                                                ! invert.irp.f:  70
+            do j=1,rank                                              ! invert.irp.f:  71
+                INV(i,j)= A(i,j)                                     ! invert.irp.f:  73
+            enddo                                                    ! invert.irp.f:  74
+          enddo                                                      ! invert.irp.f:  75
+          print *, 'Matrix Inverse:'                                 ! invert.irp.f:  77
+          do i=1,rank                                                ! invert.irp.f:  78
+            do j=1,rank                                              ! invert.irp.f:  79
+                write(6,12)(INV(j,i))                                ! invert.irp.f:  80
+            enddo                                                    ! invert.irp.f:  81
+                write(6,*)                                           ! invert.irp.f:  82
+          enddo                                                      ! invert.irp.f:  83
+          PROD=0d0                                                   ! invert.irp.f:  85
+          print *, 'Matrix Inverse*Matrix:'                          ! invert.irp.f:  86
+          do i=1,rank                                                ! invert.irp.f:  87
+            do j=1,rank                                              ! invert.irp.f:  88
+                do k=1,rank                                          ! invert.irp.f:  89
+                    PROD(j,i)=PROD(j,i)+(INV(j,k)*M(k,i))            ! invert.irp.f:  90
+                enddo                                                ! invert.irp.f:  91
+                write(6,12)((PROD(j,i)))                             ! invert.irp.f:  92
+            enddo                                                    ! invert.irp.f:  93
+                write(6,*)                                           ! invert.irp.f:  94
+          enddo                                                      ! invert.irp.f:  95
+          deallocate (A)                                             ! invert.irp.f:  97
+          deallocate (AP)                                            ! invert.irp.f:  98
+          deallocate (IPIV)                                          ! invert.irp.f:  99
+          deallocate (WORK)                                          ! invert.irp.f: 100
+   12   format((F8.4,'  '),$)                                        ! invert.irp.f: 101
+end                                                                  ! invert.irp.f: 104
