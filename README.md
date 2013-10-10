@@ -1,4 +1,4 @@
-INVERION (DSPTRI)
+INVERSION (DSPTRI)
 =================
 
 * invert a symmetric matrix
